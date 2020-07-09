@@ -78,30 +78,9 @@ void stand() {
   Serial.println("Standing");
   uint16_t degrees = 90;
   double pulseLen = map(degrees, 0, 180, SERVOMIN, SERVOMAX);
-  pwm1.setPWM(0, 0, pulseLen);
-  pwm1.setPWM(1, 0, pulseLen);
-  pwm1.setPWM(2, 0, pulseLen);
-  pwm1.setPWM(3, 0, pulseLen);
-  pwm1.setPWM(4, 0, pulseLen);
-  pwm1.setPWM(5, 0, pulseLen);
-  pwm1.setPWM(6, 0, pulseLen);
-  pwm1.setPWM(7, 0, pulseLen);
-  pwm1.setPWM(8, 0, pulseLen);
-  pwm1.setPWM(9, 0, pulseLen);
-  pwm1.setPWM(10, 0, pulseLen);
-  pwm1.setPWM(11, 0, pulseLen);
-  pwm1.setPWM(12, 0, pulseLen);
-  pwm1.setPWM(13, 0, pulseLen);
-  pwm1.setPWM(14, 0, pulseLen);
-  pwm1.setPWM(15, 0, pulseLen);
-  pwm2.setPWM(0, 0, pulseLen);
-  pwm2.setPWM(1, 0, pulseLen);
-  pwm2.setPWM(2, 0, pulseLen);
-  pwm2.setPWM(3, 0, pulseLen);
-  pwm2.setPWM(4, 0, pulseLen);
-  pwm2.setPWM(5, 0, pulseLen);
-  pwm2.setPWM(6, 0, pulseLen);
-  pwm2.setPWM(7, 0, pulseLen);
+  setCoxaDegrees(degrees);
+  setTibiaDegrees(degrees);
+  setFemurDegrees(degrees);
 }
 
 void sit() {
@@ -109,7 +88,6 @@ void sit() {
   setCoxaDegrees(90);
   setTibiaDegrees(1);
   setFemurDegrees(1);
-
 }
 
 void setCoxaDegrees(uint16_t degrees) {
