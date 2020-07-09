@@ -77,8 +77,8 @@ void loop() {
 void stand() {
   Serial.println("Standing");
   setCoxaDegrees(90);
-  setTibiaDegrees(112.5);
-  setFemurDegrees(135);
+  setTibiaDegrees(90);
+  setFemurDegrees(80);
 }
 
 void sit() {
