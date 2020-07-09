@@ -76,17 +76,16 @@ void loop() {
 
 void stand() {
   Serial.println("Standing");
-  uint16_t degrees = 90;
-  setCoxaDegrees(degrees);
-  setTibiaDegrees(degrees);
-  setFemurDegrees(degrees);
+  setCoxaDegrees(90);
+  setTibiaDegrees(112.5);
+  setFemurDegrees(135);
 }
 
 void sit() {
   Serial.println("Sitting");
   setCoxaDegrees(90);
-  setTibiaDegrees(1);
-  setFemurDegrees(1);
+  setTibiaDegrees(0);
+  setFemurDegrees(0);
 }
 
 void setCoxaDegrees(uint16_t degrees) {
