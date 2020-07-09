@@ -77,7 +77,6 @@ void loop() {
 void stand() {
   Serial.println("Standing");
   uint16_t degrees = 90;
-  double pulseLen = map(degrees, 0, 180, SERVOMIN, SERVOMAX);
   setCoxaDegrees(degrees);
   setTibiaDegrees(degrees);
   setFemurDegrees(degrees);
