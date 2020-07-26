@@ -11,29 +11,49 @@ Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x41);
 #define SERVO_FREQ 50
 #define OSC_HRZ 27000000
 
-#define TIBIA_UP 80
-#define TIBIA_DOWN 100
-#define TIBIA_CLOSED 45
+// put all tibias on pwm1
+#define L1Tibia 0
+#define L2Tibia 1
+#define L3Tibia 2
+#define L4Tibia 3
+#define R4Tibia 4
+#define R3Tibia 5
+#define R2Tibia 6
+#define R1Tibia 7
 
-#define FEMUR_UP 50
-#define FEMUR_DOWN 80
-#define FEMUR_CLOSED 10
+// put the rest on pwm2
+#define L1Femur 10
+#define L2Femur 12
+#define L3Femur 8
+#define L4Femur 7
+#define R4Femur 0
+#define R3Femur 9
+#define R2Femur 11
+#define R1Femur 6
 
-#define COXA_FWD 70
-#define COXA_BWD 45
-#define COXA_CLOSED 90
+#define L1Coxa 5
+#define L2Coxa 13
+#define L3Coxa 3
+#define L4Coxa 2
+#define R4Coxa 15
+#define R3Coxa 1
+#define R2Coxa 4
+#define R1Coxa 14
 
-#define DELAY 300
+#define Delay 300
 
-/*
-                        ~face~
-  Leg Tibia   Femur   Coxa    Coxa    Femur   Tibia   Leg
-  L1  pmw1.0  pmw2.7  pmw2.15 pmw2.8  pmw2.0  pmw1.7  R1
-  L2  pmw1.1  pmw2.6  pmw2.14 pmw2.9  pmw2.1  pmw1.6  R2
-  L1  pmw1.2  pmw2.5  pmw2.13 pmw2.10 pmw2.2  pmw1.5  R1
-  L2  pmw1.3  pmw2.4  pmw2.12 pmw2.11 pmw2.3  pmw1.4  R2
-                        ~butt~
-*/
+int CoxaSit = 90;
+int FemurSit = 5;
+int TibiaSit = 10;
+int CoxaStand = 90;
+int FemurStand = 80;
+int TibiaStand = 90;
+int FemurRaise = 35;
+int TibiaRaise = 85;
+int LSwingForward = 85;
+int RSwingForward = 95;
+int LSwingBackward = RSwingForward;
+int RSwingBackward = LSwingForward;
 
 void setup() {
   Serial.begin(9600);
@@ -43,7 +63,7 @@ void setup() {
   pwm2.begin();
   pwm2.setOscillatorFrequency(OSC_HRZ);
   pwm2.setPWMFreq(SERVO_FREQ);
-  stand();
+  Sit();
 }
 
 void loop() {
@@ -51,141 +71,196 @@ void loop() {
     int cmd = Serial.parseInt();
     if (cmd > 0) {
       Serial.println(cmd);
-      //   L1_coxa(cmd);
       switch (cmd) {
         case 1:
-          walkfwd();
+          WalkForward();
+          break;
+        case 2:
+          WalkBackward();
+          break;
+        case 3:
+          TurnLeft();
+          break;
+        case 4:
+          TurnRight();
           break;
         case 5:
-          sit();
+          Stand();
           break;
         case 6:
-          stand();
+          Sit();
           break;
         default:
-          stand();
+          Stand();
+          break;
       }
     }
   }
 }
 
-void stand() {
+void WalkForward() {
+  Serial.println("Walking Forward");
+  Stand();
+  Tripod1Up();
+  Tripod1SwingForward();
+  Tripod2SwingBackward();
+  Tripod1Stance();
+  Tripod2Up();
+  Tripod2SwingForward();
+  Tripod1SwingBackward();
+  Tripod2Stance();
+  delay(Delay);
+}
+
+void WalkBackward() {
+  Serial.println("Walking Backward");
+  Stand();
+  Tripod1Up();
+  Tripod1SwingBackward();
+  Tripod2SwingForward();
+  Tripod1Stance();
+  Tripod2Up();
+  Tripod2SwingBackward();
+  Tripod1SwingForward();
+  Tripod2Stance();
+  delay(Delay);
+}
+
+void TurnLeft() {
+  Serial.println("Turning Left");
+  Stand();
+  Tripod1Up();
+  Tripod1SwingBackward();
+  Tripod2SwingForward();
+  Tripod1Stance();
+  delay(Delay);
+}
+
+void TurnRight() {
+  Serial.println("Turning Right");
+  Stand();
+  Tripod2Up();
+  Tripod2SwingForward();
+  Tripod1SwingBackward();
+  Tripod2Stance();
+  delay(Delay);
+}
+
+void Stand() {
   Serial.println("Standing");
-  L1_coxa(COXA_CLOSED);
-  L2_coxa(COXA_CLOSED);
-  R1_coxa(COXA_CLOSED);
-  R2_coxa(COXA_CLOSED);
-  L1_femur(FEMUR_DOWN);
-  R2_femur(FEMUR_DOWN);
-  R1_femur(FEMUR_DOWN);
-  L2_femur(FEMUR_DOWN);
-  L1_tibia(TIBIA_DOWN);
-  R2_tibia(TIBIA_DOWN);
-  R1_tibia(TIBIA_DOWN);
-  L2_tibia(TIBIA_DOWN);
+  SetAllCoxas(CoxaStand);
+  SetAllFemurs(FemurStand);
+  SetAllTibias(TibiaStand);
 }
 
-void sit() {
+void Sit() {
   Serial.println("Sitting");
-  L1_coxa(COXA_CLOSED);
-  L2_coxa(COXA_CLOSED);
-  R1_coxa(COXA_CLOSED);
-  R2_coxa(COXA_CLOSED);
-  L1_femur(FEMUR_CLOSED);
-  R2_femur(FEMUR_CLOSED);
-  R1_femur(FEMUR_CLOSED);
-  L2_femur(FEMUR_CLOSED);
-  L1_tibia(FEMUR_CLOSED);
-  R2_tibia(FEMUR_CLOSED);
-  R1_tibia(FEMUR_CLOSED);
-  L2_tibia(FEMUR_CLOSED);
+  SetAllCoxas(CoxaSit);
+  SetAllFemurs(FemurSit);
+  SetAllTibias(TibiaSit);
 }
 
-void walkfwd() {
-  // l1 swing
-  L1_tibia(TIBIA_UP);
-  L1_femur(FEMUR_UP);
-  L1_coxa(COXA_FWD);
-  // l2 stance
-  L2_tibia(TIBIA_DOWN);
-  L2_femur(FEMUR_DOWN);
-  // r1 stance
-  R1_tibia(TIBIA_DOWN);
-  R1_femur(FEMUR_DOWN);
-  // r2 swing
-  R2_tibia(TIBIA_UP);
-  R2_femur(FEMUR_UP);
-  R2_coxa(COXA_BWD);
-  // delay
-  delay(delay);
-  // l1 stance
-  L1_tibia(TIBIA_DOWN);
-  L1_femur(FEMUR_DOWN);
-  // l2 swing
-  L2_tibia(TIBIA_UP);
-  L2_femur(FEMUR_UP);
-  L2_coxa(COXA_FWD);
-  // r1 swing
-  R1_tibia(TIBIA_UP);
-  R1_femur(FEMUR_UP);
-  R1_coxa(COXA_BWD);
-  // r2 stance
-  R2_tibia(TIBIA_DOWN);
-  R2_femur(FEMUR_DOWN);
-  // delay
-  delay(delay);
+void Tripod1Up() {
+  Tripod1Femur(FemurRaise);
+  Tripod1Tibia(TibiaRaise);
 }
 
-void L1_tibia(uint16_t degrees) {
-  pwm1.setPWM(0, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm1.setPWM(2, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void L2_tibia(uint16_t degrees) {
-  pwm1.setPWM(1, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm1.setPWM(3, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void R1_tibia(uint16_t degrees) {
-  pwm1.setPWM(7, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm1.setPWM(5, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void R2_tibia(uint16_t degrees) {
-  pwm1.setPWM(6, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm1.setPWM(4, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void L1_femur(uint16_t degrees) {
-  pwm2.setPWM(7, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(5, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void L2_femur(uint16_t degrees) {
-  pwm2.setPWM(6, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(4, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void R1_femur(uint16_t degrees) {
-  pwm2.setPWM(0, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(2, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void R2_femur(uint16_t degrees) {
-  pwm2.setPWM(1, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(3, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void L1_coxa(uint16_t degrees) {
-  pwm2.setPWM(15, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(13, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void L2_coxa(uint16_t degrees) {
-  pwm2.setPWM(14, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(12, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void R1_coxa(uint16_t degrees) {
-  pwm2.setPWM(8, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(10, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-}
-void R2_coxa(uint16_t degrees) {
-  pwm2.setPWM(9, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
-  pwm2.setPWM(11, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
+void Tripod1SwingForward() {
+  SetPwm2(L1Coxa, LSwingForward);
+  SetPwm2(L3Coxa, LSwingForward);
+  SetPwm2(R4Coxa, RSwingForward);
+  SetPwm2(R2Coxa, RSwingForward);
 }
 
-void test(uint16_t degrees) {
-  Serial.println(degrees);
-  pwm2.setPWM(8, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
+void Tripod1SwingBackward() {
+  SetPwm2(L1Coxa, LSwingBackward);
+  SetPwm2(L3Coxa, LSwingBackward);
+  SetPwm2(R4Coxa, RSwingBackward);
+  SetPwm2(R2Coxa, RSwingBackward);
+}
+
+void Tripod1Stance() {
+  Tripod1Femur(FemurStand);
+  Tripod1Tibia(FemurStand);
+}
+
+void Tripod2Up() {
+  Tripod2Femur(FemurRaise);
+  Tripod2Tibia(TibiaRaise);
+}
+
+void Tripod2SwingForward() {
+  SetPwm2(L2Coxa, LSwingForward);
+  SetPwm2(L4Coxa, LSwingForward);
+  SetPwm2(R3Coxa, RSwingForward);
+  SetPwm2(R1Coxa, RSwingForward);
+}
+
+void Tripod2SwingBackward() {
+  SetPwm2(L2Coxa, LSwingBackward);
+  SetPwm2(L4Coxa, LSwingBackward);
+  SetPwm2(R3Coxa, LSwingBackward);
+  SetPwm2(R1Coxa, LSwingBackward);
+}
+
+void Tripod2Stance() {
+  Tripod2Femur(FemurStand);
+  Tripod2Tibia(TibiaStand);
+}
+
+void SetAllFemurs(int degrees) {
+  Tripod1Femur(degrees);
+  Tripod2Femur(degrees);
+}
+
+void SetAllTibias(int degrees) {
+  Tripod1Tibia(degrees);
+  Tripod2Tibia(degrees);
+}
+
+void SetAllCoxas(int degrees) {
+  SetPwm2(L1Coxa, degrees);
+  SetPwm2(L2Coxa, degrees);
+  SetPwm2(L3Coxa, degrees);
+  SetPwm2(L4Coxa, degrees);
+  SetPwm2(R4Coxa, degrees);
+  SetPwm2(R3Coxa, degrees);
+  SetPwm2(R2Coxa, degrees);
+  SetPwm2(R1Coxa, degrees);
+}
+
+void Tripod1Femur(int degrees) {
+  SetPwm2(L1Femur, degrees);
+  SetPwm2(L3Femur, degrees);
+  SetPwm2(R4Femur, degrees);
+  SetPwm2(R2Femur, degrees);
+}
+
+void Tripod1Tibia(int degrees) {
+  SetPwm1(L1Tibia, degrees);
+  SetPwm1(L3Tibia, degrees);
+  SetPwm1(R4Tibia, degrees);
+  SetPwm1(R2Tibia, degrees);
+}
+
+void Tripod2Femur(int degrees) {
+  SetPwm2(L2Femur, degrees);
+  SetPwm2(L4Femur, degrees);
+  SetPwm2(R3Femur, degrees);
+  SetPwm2(R1Femur, degrees);
+}
+
+void Tripod2Tibia(int degrees) {
+  SetPwm1(L2Tibia, degrees);
+  SetPwm1(L4Tibia, degrees);
+  SetPwm1(R3Tibia, degrees);
+  SetPwm1(R1Tibia, degrees);
+}
+
+void SetPwm1(int servoNumber, int degrees) {
+  pwm1.setPWM(servoNumber, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
+}
+
+void SetPwm2(int servoNumber, int degrees) {
+  pwm2.setPWM(servoNumber, 0, map(degrees, 0, 180, SERVOMIN, SERVOMAX));
 }
